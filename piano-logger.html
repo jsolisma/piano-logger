@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piano Practice Logger</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    
+    .app {
+      width: 100%;
+      max-width: 800px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .container {
+      padding: 2rem;
+    }
+    
+    h1 { font-size: 2rem; color: #333; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; color: #333; margin-bottom: 1rem; }
+    h3 { font-size: 1.1rem; color: #333; margin-bottom: 0.75rem; margin-top: 1rem; }
+    
+    p { color: #666; line-height: 1.6; margin-bottom: 1rem; }
+    
+    .hidden { display: none !important; }
+    
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary {
+      background-color: #667eea;
+      color: white;
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      margin: 1.5rem 0 0 0;
+    }
+    
+    .btn-start {
+      background-color: #4CAF50;
+      color: white;
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+    }
+    
+    .btn-pause {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    .btn-skip {
+      background-color: #2196F3;
+      color: white;
+    }
+    
+    .btn-metronome {
+      background-color: #ff9800;
+      color: white;
+      padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-metronome.off {
+      background-color: #757575;
+    }
+    
+    .timer-display {
+      font-size: 4rem;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      margin: 2rem 0;
+      color: #667eea;
+    }
+    
+    .timer-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .timer-controls button {
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .metronome-section {
+      border-top: 1px solid #eee;
+      margin-top: 2rem;
+      padding-top: 2rem;
+    }
+    
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .slider-container label {
+      min-width: 80px;
+      font-weight: 600;
+    }
+    
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      cursor: pointer;
+    }
+    
+    textarea, input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      margin-bottom: 0.5rem;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    textarea:focus, input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .phase-info {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .phase-description {
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #2196F3;
+      font-size: 0.95rem;
+    }
+    
+    .past-sessions {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #eee;
+    }
+    
+    .session-item {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    
+    .last-session-banner {
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .last-session-banner p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    
+    .last-session-summary {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .phase-checkbox-group {
+      background: #fafafa;
+      padding: 1.5rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .phase-checkbox {
+      margin-bottom: 1.5rem;
+    }
+    
+    .phase-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 0.75rem;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    
+    .phase-checkbox label {
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+    
+    .phase-checkbox-content {
+      flex: 1;
+    }
+    
+    .phase-name {
+      font-weight: 600;
+      color: #333;
+      display: block;
+    }
+    
+    .phase-time-input {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      align-items: center;
+    }
+    
+    .phase-time-input input {
+      width: 80px;
+      margin-bottom: 0;
+    }
+    
+    .time-label {
+      font-size: 0.85rem;
+      color: #999;
+    }
+    
+    .principle-card {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #ff9800;
+    }
+    
+    .principle-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="container">
+      <!-- Home Screen -->
+      <div id="home" class="screen">
+        <h1>🎹 Piano Practice Logger</h1>
+        <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+          Today's practice • <span id="todayDate"></span>
+        </p>
+
+        <!-- Last Session Banner -->
+        <div id="lastSessionBanner" class="last-session-banner hidden">
+          <p>Last session: <span class="last-session-summary" id="lastSessionSummary"></span></p>
+        </div>
+        
+        <div class="phase-info">
+          <p><strong>Quality over Quantity:</strong> 30 minutes of focused, intentional practice beats unfocused grinding. You can skip phases some days—structure what serves your goal today.</p>
+        </div>
+
+        <button class="btn-primary" onclick="app.showScreen('phase-selection')">
+          ▶ Start Today's Session
+        </button>
+
+        <div class="past-sessions">
+          <h3>Recent Sessions</h3>
+          <div id="pastSessionsList"></div>
+        </div>
+      </div>
+
+      <!-- Phase Selection Screen -->
+      <div id="phase-selection" class="screen hidden">
+        <h2>📋 Choose Your Practice Structure</h2>
+        
+        <p style="margin-bottom: 2rem;">Select the phases you want to focus on today and set your time for each.</p>
+
+        <div class="phase-checkbox-group">
+          <!-- Warmup Phase -->
+          <div class="phase-checkbox">
+            <label>
+              <input type="checkbox" id="includeWarmup" checked onchange="app.togglePhaseTimeInput('warmup')">
+              <div class="phase-checkbox-content">
+                <span class="phase-name">🔥 Phase 1: Warm-Up</span>
+                <div class="phase-description">
+                  Prepare your hands and mind. Stretching, self-massage, and finger exercises (like Hanon starting at 60 BPM) create blood flow and muscle readiness.
+                </div>
+                <div class="phase-time-input">
+                  <input type="number" id="warmupTime" value="10" min="5" max="30" onchange="app.updateSessionData()">
+                  <span class="time-label">minutes</span>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Technical Work Phase -->
+          <div class="phase-checkbox">
+            <label>
+              <input type="checkbox" id="includeFocused" checked onchange="app.togglePhaseTimeInput('focused')">
+              <div class="phase-checkbox-content">
+                <span class="phase-name">💪 Phase 2: Technical Work</span>
+                <div class="phase-description">
+                  Build fundamentals and muscle memory. Scales, arpeggios, hand-independence drills, Philipp's Exercises. Isolate problem areas and drill them slowly with correct technique.
+                </div>
+                <div class="phase-time-input">
+                  <input type="number" id="focusedTime" value="20" min="10" max="45" onchange="app.updateSessionData()">
+                  <span class="time-label">minutes</span>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Repertoire Phase -->
+          <div class="phase-checkbox">
+            <label>
+              <input type="checkbox" id="includePerformance" checked onchange="app.togglePhaseTimeInput('performance')">
+              <div class="phase-checkbox-content">
+                <span class="phase-name">✨ Phase 3: Repertoire & Application</span>
+                <div class="phase-description">
+                  Apply what you've learned. Work on actual pieces, jazz standards, or improvisation. This is where technique becomes music.
+                </div>
+                <div class="phase-time-input">
+                  <input type="number" id="performanceTime" value="15" min="5" max="45" onchange="app.updateSessionData()">
+                  <span class="time-label">minutes</span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div style="background: #fffbea; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid #ff9800;">
+          <p style="margin: 0; font-size: 0.95rem;"><strong>💡 Tip:</strong> You don't need to do all phases every day. Choose what serves your practice goal today.</p>
+        </div>
+
+        <button class="btn-primary" onclick="app.startSelectedPhases()">
+          ▶ Begin Practice Session
+        </button>
+        <button class="btn-skip" onclick="app.showScreen('home')" style="width: 100%; background-color: #999;">Back to Home</button>
+      </div>
+
+      <!-- Warmup Timer Screen -->
+      <div id="warmup" class="screen hidden">
+        <h2>🔥 Warm-Up</h2>
+        <div class="timer-display" id="warmupTimer">10:00</div>
+        <div class="timer-controls">
+          <button id="warmupPlayBtn" class="btn-start" onclick="app.toggleTimer('warmup')">▶ Start</button>
+          <button class="btn-skip" onclick="app.skipToFeedback('warmup')">⏭ Skip to Feedback</button>
+        </div>
+        <div class="metronome-section">
+          <h3>🎵 Metronome</h3>
+          <div class="slider-container">
+            <label id="bpmLabel">120 BPM</label>
+            <input type="range" min="60" max="180" value="120" id="bpmSlider" onchange="app.setBPM(this.value)">
+          </div>
+          <button id="metronomeBtn" class="btn-metronome off" onclick="app.toggleMetronome()">🔇 Metronome Off</button>
+        </div>
+      </div>
+
+      <div id="warmup-feedback" class="screen hidden">
+        <h2>🔥 Warm-Up Feedback</h2>
+        <p>How did that feel?</p>
+        <textarea id="warmupFeedback" placeholder="e.g., felt stiff, loosened up, hands ready..."></textarea>
+        <button class="btn-primary" onclick="app.saveFeedback('warmup')">Continue</button>
+      </div>
+
+      <!-- Focused Work Timer Screen -->
+      <div id="focused-work" class="screen hidden">
+        <h2>💪 Technical Work</h2>
+        <div class="timer-display" id="focusedTimer">20:00</div>
+        <div class="timer-controls">
+          <button id="focusedPlayBtn" class="btn-start" onclick="app.toggleTimer('focused-work')">▶ Start</button>
+          <button class="btn-skip" onclick="app.skipToFeedback('focused-work')">⏭ Skip to Feedback</button>
+        </div>
+        <div class="metronome-section">
+          <h3>🎵 Metronome</h3>
+          <div class="slider-container">
+            <label id="bpmLabel2">120 BPM</label>
+            <input type="range" min="60" max="180" value="120" id="bpmSlider2" onchange="app.setBPM(this.value)">
+          </div>
+          <button id="metronomeBtn2" class="btn-metronome off" onclick="app.toggleMetronome()">🔇 Metronome Off</button>
+        </div>
+      </div>
+
+      <div id="focused-work-feedback" class="screen hidden">
+        <h2>💪 Technical Work Feedback</h2>
+        <p>What did you focus on? Any breakthroughs or challenges?</p>
+        <textarea id="focusedFeedback" placeholder="e.g., scales feeling smoother, left hand still tight, arpeggios improving..."></textarea>
+        <button class="btn-primary" onclick="app.saveFeedback('focused-work')">Continue</button>
+      </div>
+
+      <!-- Performance Timer Screen -->
+      <div id="performance" class="screen hidden">
+        <h2>✨ Repertoire & Application</h2>
+        <div class="timer-display" id="performanceTimer">15:00</div>
+        <div class="timer-controls">
+          <button id="performancePlayBtn" class="btn-start" onclick="app.toggleTimer('performance')">▶ Start</button>
+          <button class="btn-skip" onclick="app.skipToFeedback('performance')">⏭ Skip to Feedback</button>
+        </div>
+        <div class="metronome-section">
+          <h3>🎵 Metronome</h3>
+          <div class="slider-container">
+            <label id="bpmLabel3">120 BPM</label>
+            <input type="range" min="60" max="180" value="120" id="bpmSlider3" onchange="app.setBPM(this.value)">
+          </div>
+          <button id="metronomeBtn3" class="btn-metronome off" onclick="app.toggleMetronome()">🔇 Metronome Off</button>
+        </div>
+      </div>
+
+      <div id="performance-feedback" class="screen hidden">
+        <h2>✨ Repertoire Feedback</h2>
+        <p>Which pieces played well? What felt good?</p>
+        <textarea id="performanceFeedback" placeholder="e.g., confident on Nocturne, Ballade coming together, improvisation flowed..."></textarea>
+        <button class="btn-primary" onclick="app.saveFeedback('performance')">Continue to Summary</button>
+      </div>
+
+      <!-- Summary Screen -->
+      <div id="summary" class="screen hidden">
+        <h2>📊 Session Summary</h2>
+        
+        <div class="form-group">
+          <label>Overall Energy Level: <span id="energyValue">5</span>/10</label>
+          <input type="range" min="1" max="10" value="5" id="energySlider" onchange="document.getElementById('energyValue').textContent = this.value">
+        </div>
+
+        <div class="form-group">
+          <label>What Clicked Today?</label>
+          <textarea id="whatClicked" placeholder="What went well? Any breakthroughs?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>What to Focus On Next?</label>
+          <textarea id="whatNext" placeholder="Specific areas for next session"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Session Quality</label>
+          <select id="sessionQuality">
+            <option value="low">Low - Unfocused, struggled</option>
+            <option value="medium">Medium - Okay, but could focus better</option>
+            <option value="good" selected>Good - Solid, intentional practice</option>
+            <option value="excellent">Excellent - Very focused and productive</option>
+          </select>
+        </div>
+
+        <button class="btn-primary" onclick="app.saveSummary()">✓ Save Session & Return Home</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <script>
+    const app = {
+      currentPhase: 'home',
+      timers: {},
+      metronomeActive: false,
+      bpm: 120,
+      synth: null,
+      metronomeInterval: null,
+      sessionData: {},
+      phasesToRun: [],
+
+      init() {
+        document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US', { 
+          weekday: 'short', month: 'short', day: 'numeric' 
+        });
+        this.loadSessions();
+        this.setupMetronome();
+        this.displayLastSession();
+      },
+
+      setupMetronome() {
+        Tone.start();
+        this.synth = new Tone.Synth({
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+        }).toDestination();
+      },
+
+      showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById(screenId).classList.remove('hidden');
+        this.currentPhase = screenId;
+      },
+
+      togglePhaseTimeInput(phase) {
+        // Enable/disable time input based on checkbox
+        const checkbox = document.getElementById(`include${phase.charAt(0).toUpperCase() + phase.slice(1)}`);
+        const timeInput = document.getElementById(`${phase}Time`);
+        timeInput.disabled = !checkbox.checked;
+      },
+
+      updateSessionData() {
+        // Update session data with user's selected times
+        this.sessionData.warmup_minutes = parseInt(document.getElementById('warmupTime').value) || 10;
+        this.sessionData.focused_minutes = parseInt(document.getElementById('focusedTime').value) || 20;
+        this.sessionData.performance_minutes = parseInt(document.getElementById('performanceTime').value) || 15;
+      },
+
+      startSelectedPhases() {
+        this.phasesToRun = [];
+        
+        if (document.getElementById('includeWarmup').checked) {
+          this.phasesToRun.push('warmup');
+        }
+        if (document.getElementById('includeFocused').checked) {
+          this.phasesToRun.push('focused-work');
+        }
+        if (document.getElementById('includePerformance').checked) {
+          this.phasesToRun.push('performance');
+        }
+
+        if (this.phasesToRun.length === 0) {
+          alert('Please select at least one phase!');
+          return;
+        }
+
+        this.updateSessionData();
+        
+        this.sessionData = {
+          date: new Date().toISOString().split('T')[0],
+          startTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          warmup_minutes: parseInt(document.getElementById('warmupTime').value) || 10,
+          focused_minutes: parseInt(document.getElementById('focusedTime').value) || 20,
+          performance_minutes: parseInt(document.getElementById('performanceTime').value) || 15
+        };
+
+        this.startNextPhase();
+      },
+
+      startNextPhase() {
+        if (this.phasesToRun.length === 0) {
+          this.showScreen('summary');
+          return;
+        }
+
+        const phase = this.phasesToRun.shift();
+        const timeMap = {
+          'warmup': this.sessionData.warmup_minutes,
+          'focused-work': this.sessionData.focused_minutes,
+          'performance': this.sessionData.performance_minutes
+        };
+
+        this.startPhase(phase, timeMap[phase]);
+      },
+
+      startPhase(phase, durationMin) {
+        const durationSec = durationMin * 60;
+        this.timers[phase] = {
+          remaining: durationSec,
+          duration: durationSec,
+          active: false
+        };
+        this.showScreen(phase);
+        this.updateTimerDisplay(phase);
+      },
+
+      toggleTimer(phase) {
+        const timer = this.timers[phase];
+        timer.active = !timer.active;
+        
+        const btnMap = {
+          'warmup': 'warmupPlayBtn',
+          'focused-work': 'focusedPlayBtn',
+          'performance': 'performancePlayBtn'
+        };
+        
+        const btn = document.getElementById(btnMap[phase]);
+        btn.textContent = timer.active ? '⏸ Pause' : '▶ Start';
+        btn.className = timer.active ? 'btn-pause' : 'btn-start';
+
+        if (timer.active) {
+          this.startTimer(phase);
+        }
+      },
+
+      startTimer(phase) {
+        const timer = this.timers[phase];
+        const interval = setInterval(() => {
+          if (!timer.active) {
+            clearInterval(interval);
+            return;
+          }
+          timer.remaining--;
+          this.updateTimerDisplay(phase);
+          
+          if (timer.remaining <= 0) {
+            timer.active = false;
+            clearInterval(interval);
+            this.playAlert();
+          }
+        }, 1000);
+      },
+
+      updateTimerDisplay(phase) {
+        const timer = this.timers[phase];
+        const mins = Math.floor(timer.remaining / 60);
+        const secs = timer.remaining % 60;
+        const display = `${mins}:${secs.toString().padStart(2, '0')}`;
+        
+        const displayMap = {
+          'warmup': 'warmupTimer',
+          'focused-work': 'focusedTimer',
+          'performance': 'performanceTimer'
+        };
+        
+        const el = document.getElementById(displayMap[phase]);
+        if (el) el.textContent = display;
+      },
+
+      skipToFeedback(phase) {
+        this.timers[phase].active = false;
+        this.showScreen(`${phase}-feedback`);
+      },
+
+      saveFeedback(phase) {
+        const feedbackMap = {
+          'warmup': 'warmupFeedback',
+          'focused-work': 'focusedFeedback',
+          'performance': 'performanceFeedback'
+        };
+        
+        const feedback = document.getElementById(feedbackMap[phase]).value;
+        
+        if (!this.sessionData[phase]) {
+          this.sessionData[phase] = {};
+        }
+        this.sessionData[phase].feedback = feedback;
+        this.sessionData[phase].duration_minutes = (this.timers[phase].duration - this.timers[phase].remaining) / 60;
+
+        this.startNextPhase();
+      },
+
+      saveSummary() {
+        const summary = {
+          overall_energy_level: parseInt(document.getElementById('energySlider').value),
+          what_clicked: document.getElementById('whatClicked').value,
+          what_to_work_next: document.getElementById('whatNext').value,
+          session_quality: document.getElementById('sessionQuality').value
+        };
+
+        this.sessionData.session_summary = summary;
+        this.sessionData.id = Date.now();
+
+        let sessions = JSON.parse(localStorage.getItem('piano-sessions') || '[]');
+        sessions.push(this.sessionData);
+        localStorage.setItem('piano-sessions', JSON.stringify(sessions));
+
+        alert('Session saved! Great practice! 🎵');
+        this.loadSessions();
+        this.displayLastSession();
+        this.showScreen('home');
+      },
+
+      displayLastSession() {
+        const sessions = JSON.parse(localStorage.getItem('piano-sessions') || '[]');
+        
+        if (sessions.length === 0) {
+          document.getElementById('lastSessionBanner').classList.add('hidden');
+          return;
+        }
+
+        const lastSession = sessions[sessions.length - 1];
+        const date = new Date(lastSession.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        let summaryParts = [date];
+        
+        // Add what clicked (if exists)
+        if (lastSession.session_summary?.what_clicked && lastSession.session_summary.what_clicked.trim()) {
+          summaryParts.push(lastSession.session_summary.what_clicked.substring(0, 45).trim());
+        }
+        
+        // Add energy level
+        if (lastSession.session_summary?.overall_energy_level) {
+          summaryParts.push(`⚡ ${lastSession.session_summary.overall_energy_level}/10`);
+        }
+        
+        // Add quality
+        if (lastSession.session_summary?.session_quality) {
+          const qualityEmoji = {
+            'low': '⚠️',
+            'medium': '→',
+            'good': '✓',
+            'excellent': '⭐'
+          };
+          const emoji = qualityEmoji[lastSession.session_summary.session_quality] || '';
+          summaryParts.push(`${emoji} ${lastSession.session_summary.session_quality}`);
+        }
+        
+        // Add phases run
+        const phasesRun = [];
+        if (lastSession.warmup) phasesRun.push('🔥');
+        if (lastSession['focused-work']) phasesRun.push('💪');
+        if (lastSession.performance) phasesRun.push('✨');
+        if (phasesRun.length > 0) {
+          summaryParts.push(`${phasesRun.join(' ')}`);
+        }
+        
+        const summary = summaryParts.join(' • ');
+        
+        document.getElementById('lastSessionSummary').textContent = summary;
+        document.getElementById('lastSessionBanner').classList.remove('hidden');
+      },
+
+      loadSessions() {
+        const sessions = JSON.parse(localStorage.getItem('piano-sessions') || '[]');
+        const list = document.getElementById('pastSessionsList');
+        
+        if (sessions.length === 0) {
+          list.innerHTML = '<p style="color: #999;">No sessions yet. Start your first one!</p>';
+          return;
+        }
+
+        list.innerHTML = sessions.slice(-10).reverse().map(s => {
+          const date = new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const energy = s.session_summary?.overall_energy_level || '-';
+          const quality = s.session_summary?.session_quality || 'logged';
+          return `
+            <div class="session-item">
+              ${date} • Energy: ${energy}/10 • ${quality}
+            </div>
+          `;
+        }).join('');
+      },
+
+      setBPM(value) {
+        this.bpm = parseInt(value);
+        document.getElementById('bpmLabel').textContent = `${this.bpm} BPM`;
+        document.getElementById('bpmLabel2').textContent = `${this.bpm} BPM`;
+        document.getElementById('bpmLabel3').textContent = `${this.bpm} BPM`;
+        
+        if (this.metronomeActive) {
+          this.toggleMetronome();
+          this.toggleMetronome();
+        }
+      },
+
+      toggleMetronome() {
+        this.metronomeActive = !this.metronomeActive;
+        const btns = document.querySelectorAll('[id^="metronomeBtn"]');
+        
+        btns.forEach(btn => {
+          if (this.metronomeActive) {
+            btn.textContent = '🔊 Metronome On';
+            btn.classList.remove('off');
+          } else {
+            btn.textContent = '🔇 Metronome Off';
+            btn.classList.add('off');
+          }
+        });
+
+        if (this.metronomeActive) {
+          this.startMetronome();
+        } else {
+          this.stopMetronome();
+        }
+      },
+
+      startMetronome() {
+        const beatInterval = (60 / this.bpm) * 1000;
+        this.metronomeInterval = setInterval(() => {
+          this.synth.triggerAttackRelease('C4', '8n');
+        }, beatInterval);
+      },
+
+      stopMetronome() {
+        clearInterval(this.metronomeInterval);
+      },
+
+      playAlert() {
+        this.synth.triggerAttackRelease('G5', '8n');
+        setTimeout(() => this.synth.triggerAttackRelease('G5', '8n'), 150);
+      }
+    };
+
+    // Start the app
+    app.init();
+  </script>
+</body>
+</html>
