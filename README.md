@@ -4,9 +4,9 @@ A simple practice session logger for piano. Download, open in your browser, star
 
 ## Why?
 
-I practice piano every now and then, but never consistently. I'd write notes in a book—"worked on Leia's theme, 20 min, left hand tight"—but nothing systematic.
+I practice piano every now and then, but never consistently. I'd write notes in a book—"worked on Leia's theme, 15 min, left hand tight"—but nothing systematic.
 
-This time I built an app for it. It's just an HTML file. No backend, no login, no complexity. Download it, open it in your browser, and it saves your practice sessions locally.
+I wanted something I could use on my phone. Built this with Claude—just an HTML file. No backend, no login, no complexity. Download it, open it in your browser, and it saves your practice sessions locally.
 
 ## What It Does
 
@@ -19,7 +19,7 @@ This time I built an app for it. It's just an HTML file. No backend, no login, n
 
 ## How to Use
 
-1. Download `piano-logger.html`
+1. Download `piano-logger-v2.html`
 2. Open it in any browser (desktop, tablet, mobile)
 3. Click "Start Today's Session"
 4. Practice
@@ -61,4 +61,4 @@ Open source. Use it however you want.
 
 ---
 
-First version. Works.  🎵
+Built with Claude. First version. Works. 🎵
