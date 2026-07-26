@@ -19,7 +19,7 @@ I wanted something I could use on my phone. Built this with Claude—just an HTM
 
 ## How to Use
 
-1. Download `piano-logger-v2.html`
+1. Download `index.html`
 2. Open it in any browser (desktop, tablet, mobile)
 3. Click "Start Today's Session"
 4. Practice
